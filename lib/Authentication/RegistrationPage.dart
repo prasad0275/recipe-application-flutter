@@ -36,16 +36,17 @@ class _RegistrationPage extends State<RegistrationPage> {
 
     var body = {
       "username": username,
-      "first_name": first_name ,
-      "last_name": last_name ,
-      "email": email ,
-      "password": password 
+      "first_name": first_name,
+      "last_name": last_name,
+      "email": email,
+      "password": password
     };
 
     var headers = {'Content-Type': 'application/json'};
     print(body);
-    var url = Uri.parse(pref.getString('HOST').toString() + 'user-utilitise');
-    var response = await http.post(url,headers:headers, body: jsonEncode(body));
+    var url = Uri.parse(pref.getString('HOST').toString() + '/user-utilitise');
+    var response =
+        await http.post(url, headers: headers, body: jsonEncode(body));
     if (response.statusCode == 200) {
       return true;
     }
@@ -212,20 +213,30 @@ class _RegistrationPage extends State<RegistrationPage> {
                       EdgeInsets.symmetric(vertical: 15, horizontal: 30)),
                 ),
                 onPressed: () async {
-                  bool checkPass = await checkPassword();
-                  print(checkPass);
-                  if (checkPass) {
-                    if (await register()) {
-                      error_message = '';
-                      success_message = 'User register successfully';
-                      success = true;
+                  if (_username.text.toString().length > 0) {
+                    if (_password.text.toString().length >= 8) {
+                      bool checkPass = await checkPassword();
+                      print(checkPass);
+                      if (checkPass) {
+                        if (await register()) {
+                          error_message = '';
+                          success_message = 'User register successfully';
+                          success = true;
+                        } else {
+                          success_message = '';
+                          error_message = 'Username already taken';
+                        }
+                      } else {
+                        success_message = '';
+                        error_message = 'Passwords does not matching';
+                      }
                     } else {
                       success_message = '';
-                      error_message = 'Username already taken';
+                      error_message = 'Passwords mush contains 8 characters';
                     }
                   } else {
                     success_message = '';
-                    error_message = 'Passwords does not matching';
+                    error_message = 'Username should not be empty';
                   }
 
                   setState(() {});

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:recipe/Authentication/RegistrationPage.dart';
+import 'package:recipe/Main/EntryPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -27,11 +28,12 @@ class _LoginPage extends State<LoginPage> {
     var token = await login();
     print(token);
     token = token.toString();
+    prefs.setString('TOKEN', token);
     var body = {
       "token": '$token',
     };
     var response = await http.post(
-        Uri.parse(prefs.getString('HOST').toString() + 'token/verify'),
+        Uri.parse(prefs.getString('HOST').toString() + '/token/verify'),
         body: body);
     print('verify:' + response.statusCode.toString());
     if (response.statusCode == 200) {
@@ -51,12 +53,14 @@ class _LoginPage extends State<LoginPage> {
       "password": password.text.toString()
     };
 
-    var url = Uri.parse(host.toString() + 'token');
+    var url = Uri.parse(host.toString() + '/token');
     print(url);
     var response = await http.post(url, body: data);
     print(response.statusCode);
     if (response.statusCode == 200) {
       var access_token = json.decode(response.body)['access'];
+      prefs.setString('USERNAME', username.text.toString());
+      prefs.setString('PASSWORD', password.text.toString());
       return access_token;
     } else {
       var access_token = '';
@@ -66,7 +70,7 @@ class _LoginPage extends State<LoginPage> {
 
   void start() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('HOST', 'http://localhost:8000/');
+    prefs.setString('HOST', 'http://localhost:8000');
   }
 
   @override
@@ -153,6 +157,8 @@ class _LoginPage extends State<LoginPage> {
                     prefs.setBool('isUserLogin', true);
                     message = 'User Login Successfully';
                     success = true;
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: ((context) => EntryPage())));
                   } else {
                     success = false;
                     print('Invalid credientials');
